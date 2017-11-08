@@ -1,6 +1,5 @@
-# Single phase feeders  
-
-This repository runs the single-phase Z-Bus on three IEEE distribution test networks. 
+# single-phase-modeling
+This repository runs the single-phase Z-Bus on three IEEE distribution test networks. (It also creates single-phase bus admittances from the three-phase bus admittances --- that's why it differs from the repository single-phase-feeders). 
 
 The folder ``Constructed-Mat-Files" includes the bus admittance matrix of the three networks.  A typical test run is given by the "test_run" script. If you are interested in using this material in your research, we kindly request you to cite the following publications:
 
