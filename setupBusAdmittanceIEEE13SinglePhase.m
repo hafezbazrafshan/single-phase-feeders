@@ -53,7 +53,7 @@
 clear all;
 clc;
 
-cd('IEEE-13 feeder data');
+cd('IEEE13-bus data');
 
 lineData=importdata('Line Data.xls');
 transformerData=importdata('Transformer Data.xls');

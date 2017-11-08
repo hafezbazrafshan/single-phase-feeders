@@ -2,7 +2,7 @@ clear all;
 clc;
 
 %% Step 1: Loading the feeder documents
-cd('IEEE-123 feeder data');
+cd('IEEE 123-bus data');
 lineData=importdata('line data.xls');
 transformerData=importdata('Transformer Data.xls');
 regulartorData=importdata('Regulator Data.xls');

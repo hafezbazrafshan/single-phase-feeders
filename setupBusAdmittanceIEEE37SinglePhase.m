@@ -1,7 +1,7 @@
 clear all;
 clc;
 
-cd('IEEE-37 feeder data');
+cd('IEEE 37-bus data');
 
 lineData=importdata('line data.xls');
 transformerData=importdata('Transformer Data.xls');
