@@ -1,8 +1,55 @@
-% Saves a mat file named YBUSdata
+% This script creates a MatFile named ``IEEE13SinglePhase.mat" in the
+% folder Constructed-Mat-Files.   The MatFile contains the following
+% fields:
+% 1) Sbase
+% 2) Vbase
+% 3) N (Number of buses without the Slack bus)
+% 4) allNodesActualLabels (Bus labels as given by the IEEE feeders)
+% 5) Av1001 (The voltage gain of the step-voltage regulator)
+% 6) Ytilde (the bus admittance matrix)
+% 7) sL_load  (Vector of `nominal power' of constant-power loads)
+% 8) iL_load (Vector of `nominal current' of constant-current loads)
+% 9) yL_load (Vector of `nominal admittance' of constant-impedance loads)
+% 10) gMat (An N*3 binary matrix determining load-type per node.  
+% For example, gMat(i,:)=[1 0 0] determines constant-power load only, 
+% gMat(i,:)=[1,0,1] determines constant-power and constant-impedance loads)
+% 11) Y (the bus admittance matrix removing the slack bus)
+% 12) Y_NS (the portion of Ytilde corresponding to the interface of network
+% and slack bus)
+% The MatFile created here is input to the solveIEEE13SinglePhase
+% 13) yImpedance (the matrix YL corresponding to constant-impedance loads)
+% 14) Ycheck ( Y+YImpedance)
+% 15) w (the no-load voltage profile)
+% 16) Z (inverse of Ycheck)
 
-% The YBUSdata includes the following important matrices:
-% Ybus=  the bus admittance matrix without the slack bus
-% YbusS, the bus admittance matrix witht the slack bus
+
+
+% Some comments: 
+% a) The conversion from  multi-phase lines to single-phase is as follows:
+         % i) Three-by-three Nodal admittances YNMn, YMNn, YNMm, YMNm 
+         % are created first by assuming zero's in their rows and columns corresponding to 
+         % columns.  
+         % ii) The average of non-zero diagonal entires and the non-zero
+         % off diagonal entries is computed, denoted respectively by yd and
+         % yo. 
+         % iii) A symmetrical 3*3 matrix is then constructed
+         % YSymmetric=[yd, yo, yo; yo, yd, yo; yo, yo, yd];
+         % iv)  A symmetrical component transformation is then applied
+         % yielding  a diagonal matrix Ydiagonal=diag([y0; y1; y2]).
+          % v) The representative admittance of the corresponding line is
+          % then chosen as y1. 
+ % b) The conversion in (a) is purely heuristical. 
+ % c) The conversion from multi-phase loads to single-phase: the sum of
+ % loads per bus is divided by (3).  Of course, this is also heuristical
+ % since single-phase representation is for balanced networks only.
+         
+
+
+
+
+
+
+
 clear all;
 clc;
 
@@ -248,6 +295,199 @@ for i=1:size(capOriginalNodes,1)
     Ycap(availablePhases,availablePhases)=diag(capData.data.Sheet1(i,1+availablePhases)*1j)*1000/Sbase;
     Ytilde(nIdx, nIdx)=Ytilde(nIdx,nIdx)+convertToSinglePhase(Ycap);
 end
-cd('Constructed-Mat-Files/')
-save('IEEE13SinglePhaseNetwork',  'Sbase', 'Vbase','N', 'allNodesActualLabels', 'Av1001','Ytilde','spotloadData');
-cd('..'); 
+
+
+Y=Ytilde(1:end-1,1:end-1);
+Y_NS=Ytilde(1:end-1,end);
+
+
+
+
+
+
+%% Spot load data
+
+v0=1;
+sL=zeros(N,1);
+yL=zeros(N,1);
+iL=zeros(N,1);
+
+
+
+loadData=spotloadData.data.Sheet1(1:end-1,:);
+loadType=spotloadData.textdata.Sheet1(5:end-1,2);
+
+loadIndices=loadData(:,1);
+
+% Each node can be a delta or wye connection. Each delta or wye connections
+% can be constant-PQ, constant-I, or constant-Z load types, or a
+% combination of all three. The loads at index "k" modeled as follows:
+% i_k(v) = gMat(k,:)*[i_{PQ} (v) ; i_{I} (v) ; i_{Z} (v)] where v is the
+% vector of all phase to ground voltages at all nodes and
+% i_PQ=cMat(k,:)*[ conj(sNominal1./(ePage(k,:,1)*v));
+% conj(sNominal2./(ePage(k,:,2)*v))]; 
+% i_I=cMat(k,:)*[ iNominal1* ePage(k,:,1)*v./abs(ePage(k,:,1)*v);
+%  iNominal2* ePage(k,:,2)*v./abs(ePage(k,:,2)*v)];
+% i_Z=cMat(k,:)*[ yNominal1* ePage(k,:,1)*v;
+%  yNominal2* ePage(k,:,2)*v];
+% where for wye loads: sNominal1=sNominal_k, iNominal1=iNominal_k,
+% yNominal1=yNominal_k
+% and for delta loads: let k=Lin(n,\phi)
+% sNominal1=sNominal_n^{\phi, r(\phi)}, sNominal2=sNominal_n^{\phi',
+% r(\phi')=\phi)
+
+
+
+
+
+
+gMat=zeros(N,3);  % defines the load type  gVec(1) PQ, gVec(2) I , gVec(3) Y
+
+for i=1:length(loadIndices)
+ 
+    nIdx=find(allNodesActualLabels==loadData(i,1));
+    
+    
+    
+
+    
+  
+    if (nIdx==671)
+        nomin1=17*66+66*117+17*117;
+        p1=nomin1./(117); 
+        p2=nomin1./(17);
+        p3=nomin1./(66); 
+        
+        
+        nomin2= 10*38+38*68+10*68;
+        q1=nomin2./(68);
+        q2=nomin2./(10);
+        q3=nomin2./(38);
+        
+         pLoad=(loadData(i, [3 5 7])+0.5*[p1 p2 p3])*1000/Sbase; 
+    qLoad=(loadData(i,[4 6 8])+0.5*[q1 q2 q3])*1000/Sbase; 
+    sLoad=sum((pLoad+1j*qLoad).')/3;
+    
+    % taking care of distributed load:
+    pLoad1=0.5*[17 66 117]*1000/Sbase;
+    qLoad1=0.5*[10 38 68]*1000/Sbase;
+    sLoad1=sum((pLoad1+1j*qLoad1).')/3;
+     AuxIdx=find(   allNodesActualLabels==632);
+     
+    
+      sL(AuxIdx,1)=sLoad1;
+      gMat(AuxIdx,1)=1;
+             
+             
+       
+    
+    
+    else
+         pLoad=loadData(i, [3 5 7])*1000/Sbase; 
+    qLoad=loadData(i,[4 6 8])*1000/Sbase; 
+    sLoad=sum((pLoad+1j*qLoad).')/3;
+        
+    end
+    
+     switch loadType{i}
+         
+         
+         case 'Y-PQ'
+             sL(nIdx,1)=sLoad;
+             
+             
+             
+            gMat(nIdx,1)=1;
+     
+             
+             
+    
+             
+             
+         case 'Y-PR'
+               sL(nIdx,1)=sLoad;
+             
+             
+             
+              gMat(nIdx,1)=1;
+  
+             
+             
+           
+             
+         case  'Y-I'
+             
+              iL(nIdx,1)=conj(sLoad./v0);
+             
+             
+              gMat(nIdx,2)=1;
+            
+         case 'Y-Z' 
+             
+               yL(nIdx,1)=conj(sLoad);
+               
+             
+              gMat(nIdx,3)=1;
+           
+             
+             
+         case 'D-PQ'
+             
+               sL(nIdx,1)=sLoad;
+         
+             
+              gMat(nIdx,1)=1;
+
+           
+           
+             
+         case 'D-I'
+   
+              iL(nIdx,1)=conj(sLoad./v0);
+             
+
+             
+             
+              gMat(nIdx,2)=1;
+        
+             
+          
+           
+           
+      
+           
+         
+             
+        case 'D-Z'
+            
+             yL(nIdx,1)=conj(sLoad);
+           
+            
+             gMat(nIdx,3)=1;
+       
+   
+          
+end
+end
+
+
+
+
+sL_load=sL;
+iL_load=iL;
+yL_load=yL;
+
+
+yImpedance=getYLoadImpedanceSinglePhase( yL_load);
+Ycheck=Y+yImpedance;  % (Y+YL) in the text
+Z=inv(Ycheck); 
+w= -Z*Y_NS*v0; 
+
+if exist('SinglePhaseMatFiles')~=7
+    mkdir 'SinglePhaseMatFiles'
+end
+cd('SinglePhaseMatFiles'); 
+save('IEEE13SinglePhase');
+cd('..');
+
+

@@ -1,7 +1,7 @@
 clear all;
 clc;
-cd('Case Studies/'); 
-load('IEEE13SinglePhaseData'); 
+cd('SinglePhaseMatFiles/'); 
+load('IEEE37SinglePhase'); 
 cd('..'); 
 
 
