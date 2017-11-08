@@ -51,7 +51,7 @@ For each network, the scripts `setupBusAdmittance<NetworkName>.m` and `solve<Net
 
 The MatFile created here is input to the `solve<NetworkName>SinglePhase.m`
 
- #### Some comments: 
+ #### Modeling comments
 * The conversion from  multi-phase lines to single-phase is as follows:
   1. Three-by-three Nodal admittances YNMn, YMNn, YNMm, YMNm 
           are created first by assuming zero's in their rows and columns corresponding to 
