@@ -1,4 +1,4 @@
-# single-phase-feeders
+# Single-phase feeders
 This repository creates single-phase versions of  IEEE 13-bus, IEEE 37-bus, and IEEE 123-bus distribution networks. The load-flow solution using the Z-Bus method. Further, it is demonstrated that the Z-Bus iterations are contracting.
 
 
@@ -26,7 +26,7 @@ For each network, the scripts `setupBusAdmittance<NetworkName>.m` and `solve<Net
 
 ### `setupBusAdmittance<NetworkName>.m`
  This script creates a MatFile named `<NetworkName>SinglePhase.mat` in the
- directory [SinglePhaseMatFiles/](https://github.com/hafezbazrafshan/single-phase-feeders/tree/FeederConstruction/SinglePhaseMatFiles).   The MatFile contains the following
+ directory [SinglePhaseMatFiles/](https://github.com/hafezbazrafshan/single-phase-feeders/tree/master/SinglePhaseMatFiles).   The MatFile contains the following
  
  #### Output fields
  1. `Sbase`
@@ -71,4 +71,7 @@ The MatFile created here is input to the `solve<NetworkName>SinglePhase.m`
  
  ### `solve<NetworkName>.m`
   This script takes in a MatFile named `<NetworkName>SinglePhase.mat` from the
- directory [SinglePhaseMatFiles/](https://github.com/hafezbazrafshan/single-phase-feeders/tree/FeederConstruction/SinglePhaseMatFiles) and computes the Z-Bus method 
+ directory [SinglePhaseMatFiles/](https://github.com/hafezbazrafshan/single-phase-feeders/tree/master/SinglePhaseMatFiles) and computes the Z-Bus method 
+ 
+ ## Contraction mapping
+ The directory [SinglePhaseContraction/](https://github.com/hafezbazrafshan/single-phase-feeders/tree/master/SinglePhaseContraction) numerically verify that the Z-Bus method is a contraction.
