@@ -1,9 +1,8 @@
 clear all;
 clc;
-cd('Case Studies/'); 
-load('IEEE123SinglePhaseData'); 
-cd('..'); 
-
+cd('SinglePhaseMatFiles'); 
+load('IEEE123SinglePhase');
+cd('..');
 
  vPr=repmat(v0,N,1);   
 
